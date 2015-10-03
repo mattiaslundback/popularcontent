@@ -103,12 +103,14 @@ class Extension extends BaseExtension
 
 	public function twig_popcon_getPopularContent($numResults = 10, $contenttype = NULL)
 	{
+		$ipadress = $_SERVER['REMOTE_ADDR'];
 		$ctype = ($contenttype) ? $contenttype : '%';
 		$numRes = (is_numeric($numResults)) ? (int) $numResults : 10;
-		$query = "SELECT COUNT(pcv.view_id) AS `viewCnt`, pcv.contenttype, pcv.content_id
+		$query = "SELECT COUNT(pcv.view_id) AS `viewCnt`, pcv.contenttype, pcv.content_id, pcv.view_ip_address
 			FROM `$this->tableName` pcv
 			WHERE pcv.contenttype LIKE ?
-			GROUP BY pcv.contenttype, pcv.content_id ORDER BY COUNT(pcv.view_id) DESC LIMIT $numRes";
+			AND pcv.view_ip_address LIKE $ipadress 
+			GROUP BY pcv.contenttype, pcv.content_id, pcv.view_ip_address ORDER BY COUNT(pcv.view_id) DESC LIMIT $numRes";
 		$stmt = $this->app['db']->prepare($query);
 		$stmt->bindValue(1, $ctype);
 		$han = $stmt->execute();
